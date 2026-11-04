@@ -1,0 +1,94 @@
+.barrage-container {
+  max-width: 1200px;
+  margin: auto;
+  text-align: center;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.instructions {
+  font-size: 4svh;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.timer {
+  font-size: 24px;
+  font-weight: bold;
+  color: #d32f2f;
+  margin-bottom: 20px;
+}
+
+.grid {
+  display: grid;
+  gap: 8px;
+  justify-content: center;
+  margin: 20px auto;
+}
+
+.cell {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  border: 2px solid transparent;
+  border-radius: 4px;
+
+  transition: 0.2s;
+}
+
+.selected-cell {
+  border: 2px solid black;
+}
+
+.shape {
+  font-size: 3svh;
+}
+
+.red {
+  color: #d64a3b;
+}
+
+.blue {
+  color: #69a9dc;
+}
+
+.yellow {
+  color: #f2c307;
+}
+
+
+.validate-btn {
+  margin-top: 20px;
+  padding: 12px 26px;
+
+  border: none;
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  background: #1976d2;
+  color: white;
+
+  font-size: 16px;
+}
+
+.validate-btn:hover {
+  background: #125aa3;
+}
+
+.results {
+  margin-top: 25px;
+  padding: 15px;
+
+  border-radius: 10px;
+  background-color: #f5f5f5;
+
+  text-align: left;
+  display: inline-block;
+}

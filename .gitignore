@@ -1,0 +1,23 @@
+# Environnements et dépendances (se réinstallent)
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+dist/
+
+# Données des participants : ne jamais les mettre sur git
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+backend/resultats_epreuves.csv
+backend/Entry_data/codes.xlsx
+backend/Entry_data/codesUsed.xlsx
+
+# Sauvegardes locales (l'historique git les remplace)
+sauvegarde_originaux_*/
+
+# Fichiers système / éditeur
+.DS_Store
+.vscode/
+~$*
