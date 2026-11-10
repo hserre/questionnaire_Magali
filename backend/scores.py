@@ -10,6 +10,7 @@ Les Excel sont relus automatiquement s'ils sont modifiés.
   ComprehensionTexte_IT / _FR   reponses_comprehension_texte_IT.xlsx / reponses_comprehension_texte.xlsx
                                 (bonnes réponses recopiées de ComprehensionTexte.jsx :
                                  si les articles changent, mettre ces deux fichiers à jour)
+  Similitudes_IT / _FR          Bareme_Similitudes.xlsx : 2, 1 ou 0 point (voir scores_similitudes.py)
 
 Pas de score (NULL) pour les autres épreuves, les lignes hors essais (absence...)
 et les questions introuvables dans l'Excel.
@@ -19,6 +20,8 @@ import unicodedata
 from pathlib import Path
 
 import pandas as pd
+
+from scores_similitudes import ONGLETS as SIMILITUDES, score_similitudes
 
 DOSSIER = Path(__file__).resolve().parent / "Entry_data"
 
@@ -58,7 +61,10 @@ def bonnes_reponses(epreuve):
 
 
 def calculer_score(epreuve, partie, question, reponse):
-    """1 si la réponse est la bonne, 0 sinon, None si la ligne n'est pas notée."""
+    """1 si la réponse est la bonne, 0 sinon, None si la ligne n'est pas notée.
+    Similitudes : 2, 1 ou 0 point, None si la réponse est à coter à la main."""
+    if epreuve in SIMILITUDES:
+        return score_similitudes(epreuve, partie, question, reponse)
     if partie not in PARTIES_NOTEES or question is None:
         return None
     cles = bonnes_reponses(epreuve)

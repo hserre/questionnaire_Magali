@@ -21,3 +21,6 @@ sauvegarde_originaux_*/
 .DS_Store
 .vscode/
 ~$*
+
+# Réponses de participants à coter (Similitudes)
+backend/similitudes_a_coter.csv
