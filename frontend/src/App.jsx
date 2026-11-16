@@ -68,6 +68,18 @@ function nomEtape(index) {
   return NOMS_EPREUVES[etape] ?? etape;
 }
 
+// Accès direct à une étape, pour tester : ajouter à l'adresse
+//   ?etape=Vocabulaire          (premier passage : italien)
+//   ?etape=Vocabulaire&tour=2   (deuxième passage : français)
+// La page d'accueil est sautée ; les réponses sont enregistrées sous le participant "TEST".
+const parametresUrl = new URLSearchParams(window.location.search);
+const ETAPE_DIRECTE = parcours.findIndex(
+  (p) =>
+    p.etape === parametresUrl.get("etape") &&
+    (!parametresUrl.get("tour") || p.tour === Number(parametresUrl.get("tour")))
+);
+const PARTICIPANT_TEST = "TEST";
+
 // Liste des boutons du bandeau, dans l'ordre du parcours (sans doublons)
 const groupes = parcours.reduce(
   (liste, p) => (liste.includes(p.groupe) ? liste : [...liste, p.groupe]),
@@ -155,12 +167,12 @@ export default function App() {
   };
         
 
-  const [participant, setParticipant] = useState("");
+  const [participant, setParticipant] = useState(ETAPE_DIRECTE >= 0 ? PARTICIPANT_TEST : "");
   const [isDys, setIsDys] = useState(0);
 
   // participantRef : le code est disponible immédiatement, même dans la fonction
   // appelée juste après setParticipant (fin de Bienvenue) et dans les écouteurs
-  const participantRef = useRef("");
+  const participantRef = useRef(ETAPE_DIRECTE >= 0 ? PARTICIPANT_TEST : "");
   const definirParticipant = (code) => {
     participantRef.current = code;
     setParticipant(code);
@@ -172,7 +184,7 @@ export default function App() {
 
   // -1 = Bienvenue, 0 à parcours.length - 1 = étapes du parcours,
   // parcours.length = Fin
-  const [indexParcours, setIndexParcours] = useState(-1);
+  const [indexParcours, setIndexParcours] = useState(ETAPE_DIRECTE >= 0 ? ETAPE_DIRECTE : -1);
 
   const etapeGlobal =
     indexParcours === -1

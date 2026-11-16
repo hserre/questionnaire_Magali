@@ -734,7 +734,7 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
       <div className="instructions">
         <h2 style={{ textWrap: "pretty" }}>
           In questo test dovrai prima rispondere ad alcune domande su di te,
-          poi alternerai domande sulle strategie di apprendimento con prove di
+          poi alternerai domande sulle strategie di studio con prove di
           italiano e di francese, e un test cognitivo.
         </h2>
         <h2>Si parte!</h2>

@@ -264,6 +264,7 @@ export default function Vocabulaire({ participant, onComplete, tour }) {
                 flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
+                gap: "5svh",
             }}
         >
             {/* Question (ou texte de transition) */}

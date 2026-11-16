@@ -16,7 +16,7 @@ const CONTENU = {
   it: {
     titreReglement: "",
     intro:
-      "Passiamo ora alla prova di <b>comprensione del testo</b>. <br></br>Leggi i seguenti articoli, tratti dal Regolamento del Premio Strega, e <b>indica se l’affermazione corrispondente è Vera (V) o Falsa (F)</b>. Vedrai prima un esempio e passerai al test.",
+      "Passiamo ora alla prova di <b>comprensione del testo</b>. <br></br>Leggi i seguenti articoli, tratti dal Regolamento del Premio Strega, e <b>indica se l’affermazione corrispondente è Vera (V) o Falsa (F)</b>. <br></br>Vedrai prima un esempio e passerai al test.",
     exemple: {
       texte:
         "<em>Art. 1.</em> Il Premio Strega ha sede presso la Fondazione Maria e Goffredo Bellonci (Roma, via Fratelli Ruspoli 2).",
@@ -98,7 +98,7 @@ const CONTENU = {
       },
       {
         texte:
-          "<em>Art. 4.</em> Concernant ramassage scolaire, la responsabilité de l’établissement prend effet à l’accueil des élèves dans les classes et s’achève à la fin des cours.",
+          "<em>Art. 4.</em> Concernant le ramassage scolaire, la responsabilité de l’établissement prend effet à l’accueil des élèves dans les classes et s’achève à la fin des cours.",
         affirmation:
           "L’école n’est pas responsable des élèves utilisant le ramassage scolaire avant l’heure d’accueil en classe et après la sortie.",
         correct: "vrai",
