@@ -10,7 +10,7 @@ Les Excel sont relus automatiquement s'ils sont modifiés.
   ComprehensionTexte_IT / _FR   reponses_comprehension_texte_IT.xlsx / reponses_comprehension_texte.xlsx
                                 (bonnes réponses recopiées de ComprehensionTexte.jsx :
                                  si les articles changent, mettre ces deux fichiers à jour)
-  Similitudes_IT / _FR          Bareme_Similitudes.xlsx : 2, 1 ou 0 point (voir scores_similitudes.py)
+  Similitudes_IT / _FR          Bareme_Similitudes.xlsx : 2, 1, 0 point ou 99 = à vérifier (voir scores_similitudes.py)
 
 Pas de score (NULL) pour les autres épreuves, les lignes hors essais (absence...)
 et les questions introuvables dans l'Excel.
@@ -62,7 +62,7 @@ def bonnes_reponses(epreuve):
 
 def calculer_score(epreuve, partie, question, reponse):
     """1 si la réponse est la bonne, 0 sinon, None si la ligne n'est pas notée.
-    Similitudes : 2, 1 ou 0 point, None si la réponse est à coter à la main."""
+    Similitudes : 2, 1 ou 0 point, 99 si la réponse est à vérifier (absente du barème)."""
     if epreuve in SIMILITUDES:
         return score_similitudes(epreuve, partie, question, reponse)
     if partie not in PARTIES_NOTEES or question is None:

@@ -20,8 +20,11 @@ export function ligne({
   question = null,
   reponse = null,
   duree_reponse = null,
+  duree_lecture = null,
   position_question = null,
   position_bonne_reponse = null,
+  position_symbole = null,
+  is_correct = null,
   nb_symboles_selectionnes = null,
   nb_symboles_selectionnes_corrects = null,
   duree_totale_epreuve = null,
@@ -35,8 +38,11 @@ export function ligne({
     question,
     reponse,
     duree_reponse,
+    duree_lecture,
     position_question,
     position_bonne_reponse,
+    position_symbole,
+    is_correct,
     nb_symboles_selectionnes,
     nb_symboles_selectionnes_corrects,
     duree_totale_epreuve,
@@ -97,6 +103,9 @@ export function enregistrerDureeSeance(participant, dureeSeance) {
 }
 
 // Tableaux (échelles) : une ligne par item de la page.
+// source = liste complète des items du tableau, dans l'ordre du fichier : le numéro
+// de l'item dans cette liste est enregistré dans position_question (les items sont
+// affichés dans un ordre aléatoire).
 // tempsClic[i] = ms entre l'affichage de la page et le dernier clic sur la ligne i.
 // Si dureeTotale est fourni (dernière page), il est mis sur ces lignes puis
 // propagé aux pages précédentes de la même épreuve.
@@ -109,6 +118,7 @@ export function enregistrerPageTableau({
   tempsClic,
   debutPage,
   dureeTotale = null,
+  source = null,
 }) {
   const lignes = items.map((item, i) =>
     ligne({
@@ -117,6 +127,7 @@ export function enregistrerPageTableau({
       partie,
       question: item,
       reponse: reponses[i] ?? null,
+      position_question: source && source.includes(item) ? source.indexOf(item) + 1 : null,
       duree_reponse: tempsClic[i] ?? null,
       // moment du dernier clic sur la ligne (ou de la validation si aucun clic)
       time_stamp: tempsClic[i] != null ? chrono(debutPage + tempsClic[i]) : chrono(),

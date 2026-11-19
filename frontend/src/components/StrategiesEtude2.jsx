@@ -102,6 +102,7 @@ export default function StrategieTable({ participant, onComplete }) {
       tempsClic: tempsClic.current,
       debutPage: debutPage.current,
       dureeTotale: derniere ? Date.now() - debutEpreuve.current : null,
+      source: partie === "tableau1" ? items1 : items2Source,
     });
     setReponses({});
     setPage(pageSuivante);

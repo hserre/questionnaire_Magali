@@ -24,3 +24,7 @@ sauvegarde_originaux_*/
 
 # Réponses de participants à coter (Similitudes)
 backend/similitudes_a_coter.csv
+
+# Exports de la base (données de participants)
+backend/exports/
+backend/resultats_epreuves.xlsx

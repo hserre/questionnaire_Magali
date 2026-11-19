@@ -125,6 +125,7 @@ export default function StrategiesEtude2({ participant, onComplete }) {
       tempsClic: tempsClic.current,
       debutPage: debutPage.current,
       dureeTotale: derniere ? Date.now() - debutEpreuve.current : null,
+      source: items3Source,
     });
     setReponses({});
     setPage(pageSuivante);

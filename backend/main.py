@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import List, Optional, Union
 
 from fastapi import FastAPI, HTTPException, Query
@@ -15,14 +16,18 @@ from database import (
     ajouter_code,
 )
 from utils import charger_essais_etape
+from exports import regenerer_en_arriere_plan
 
 app = FastAPI()
 
-# Cette ligne permet à React d'accéder aux audios via http://localhost:8000/Entry_data/...
-if os.path.exists("../Entry_data"):
-    app.mount("/Entry_data", StaticFiles(directory="../Entry_data"), name="Entry_data")
-elif os.path.exists("Entry_data"):
-    app.mount("/Entry_data", StaticFiles(directory="Entry_data"), name="Entry_data")
+DOSSIER_BACKEND = Path(__file__).resolve().parent
+
+# Audios : seuls les dossiers d'audios d'Entry_data sont publiés
+# (pas les Excel d'entrée, le barème ni les codes)
+for dossier_audio in ("audio_all", "audios_dictee"):
+    chemin = DOSSIER_BACKEND / "Entry_data" / dossier_audio
+    if chemin.exists():
+        app.mount(f"/Entry_data/{dossier_audio}", StaticFiles(directory=chemin), name=dossier_audio)
 
 
 # Configuration CORS pour permettre à React de communiquer avec FastAPI
@@ -37,6 +42,10 @@ app.add_middleware(
 # Initialisation de la base de données au démarrage
 init_db()
 
+# Exports pour l'analyse (backend/exports/) : régénérés au démarrage, puis à chaque
+# fin de séance (voir exports.py). La base n'est jamais modifiée par les exports.
+regenerer_en_arriere_plan()
+
 # Texte ou nombre (ex. score d'un tableau, nombre de formes cliquées au barrage)
 Valeur = Optional[Union[str, int, float]]
 
@@ -48,8 +57,11 @@ class Ligne(BaseModel):
     question: Valeur = None
     reponse: Valeur = None
     duree_reponse: Optional[float] = None
+    duree_lecture: Optional[float] = None
     position_question: Optional[int] = None
     position_bonne_reponse: Optional[int] = None
+    position_symbole: Optional[int] = None
+    is_correct: Optional[int] = None
     nb_symboles_selectionnes: Optional[int] = None
     nb_symboles_selectionnes_corrects: Optional[int] = None
     duree_totale_epreuve: Optional[float] = None
@@ -102,6 +114,7 @@ class DureeSeance(BaseModel):
 def duree_seance(data: DureeSeance):
     try:
         maj_duree_seance(data.participant, data.duree_seance)
+        regenerer_en_arriere_plan()
         return {"status": "success"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -136,3 +149,14 @@ def add_code(data: NouveauCode):
     ajouter_code(data.userName)
     return {"status": "success"}
 
+
+# ---------------------------------------------------------------------------
+# Frontend : les fichiers fabriqués par "npm run build" (frontend/dist) sont servis ici.
+# À laisser en dernier : les routes /api/... ci-dessus restent prioritaires.
+# ---------------------------------------------------------------------------
+
+DOSSIER_FRONTEND = DOSSIER_BACKEND.parent / "frontend" / "dist"
+if DOSSIER_FRONTEND.exists():
+    app.mount("/", StaticFiles(directory=DOSSIER_FRONTEND, html=True), name="frontend")
+else:
+    print(f"[frontend] {DOSSIER_FRONTEND} introuvable : lancer 'npm run build' dans le dossier frontend")

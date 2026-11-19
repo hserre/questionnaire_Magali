@@ -7,10 +7,6 @@ export default defineConfig({
   build: { target: "safari13" },
   plugins: [react()],
   server: {
-    allowedHosts: [
-      'several-personalized-adjusted-temp.trycloudflare.com',
-      'reforest-thinning-spoiled.ngrok-free.dev'
-    ],
     proxy: {
       '/api': {
         target: 'http://localhost:8000',

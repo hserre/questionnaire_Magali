@@ -131,7 +131,7 @@ export function InterfaceCroix({
         
         {infoAAfficher === "Prononciation" && (
           <audio 
-            src={`https://reforest-thinning-spoiled.ngrok-free.dev/Entry_data/audio_all/${motCentral}.mp3`}
+            src={`/Entry_data/audio_all/${motCentral}.mp3`}
             autoPlay 
             style={{ display: "none" }} 
           />

@@ -165,6 +165,7 @@ function handleDragFromDropZone(reponse, questionId) {
                     partie: parties[i],
                     question: questions[i],
                     reponse: associations[i] ?? null,
+                    position_question: i + 1, // rang de la question dans le tableau (ordre aléatoire)
                     // Les réponses peuvent être déplacées jusqu'à la validation :
                     // durée et moment sont ceux du clic sur "Conferma", pour toutes les questions
                     duree_reponse: tempsReaction,

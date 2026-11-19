@@ -11,9 +11,12 @@ début de phrase ("ce sont", "c'est", "les deux", "sono", "entrambi"...) et, en 
 le "s" du pluriel. Ainsi "Instruments de musique" = "Ce sont des instruments de musique".
 
 Résultat :
-  2 / 1 / 0  si la réponse simplifiée est dans le barème (0 aussi pour une réponse vide) ;
-  None       si la réponse n'est pas dans le barème : elle est à coter à la main
-             (l'ajouter au barème, puis relancer calculer_scores.py).
+  2 / 1 / 0  si la réponse simplifiée est dans le barème (0 = faux, et aussi pour une réponse vide) ;
+  88         faute d'orthographe probable : réponse d'un seul mot, absente du barème, mais à
+             une lettre près (lettre en plus, en moins ou différente) d'un mot du barème
+             qui vaut des points. À vérifier.
+  99         à vérifier : la réponse n'est pas dans le barème (ou l'item n'y est pas).
+  Pour 88 et 99 : coter la réponse dans le barème, puis relancer calculer_scores.py.
 """
 import re
 import unicodedata
@@ -21,7 +24,13 @@ from pathlib import Path
 
 import openpyxl
 
-FICHIER = Path(__file__).resolve().parent / "Entry_data" / "Bareme_Similitudes.xlsx"
+DOSSIER = Path(__file__).resolve().parent / "Entry_data"
+# Nom du barème : "Bareme_Similitudes.xlsx" ; les variantes avec accent ou espace
+# ("Barème Similitudes.xlsx"...) sont aussi acceptées
+NOM_BAREME = "bareme_similitudes.xlsx"
+A_VERIFIER = 99    # score des réponses absentes du barème
+ORTHOGRAPHE = 88   # un seul mot, à une lettre d'un mot du barème qui vaut des points
+
 ONGLETS = {"Similitudes_IT": "Italien", "Similitudes_FR": "Français"}
 LANGUE = {"Similitudes_IT": "it", "Similitudes_FR": "fr"}
 
@@ -78,9 +87,18 @@ def cle_item(texte):
 _cache = {"date": None, "baremes": {}, "conflits": []}
 
 
+def fichier_bareme():
+    for chemin in sorted(DOSSIER.glob("*.xlsx")):
+        nom = sans_accents(chemin.name).lower().replace(" ", "_")
+        if nom == NOM_BAREME and not chemin.name.startswith("~$"):
+            return chemin
+    raise FileNotFoundError(f"Barème des Similitudes introuvable dans {DOSSIER} (Bareme_Similitudes.xlsx)")
+
+
 def baremes():
     """{epreuve: {cle_item: {reponse simplifiée: points}}}, relu si le fichier change."""
-    date = FICHIER.stat().st_mtime
+    FICHIER = fichier_bareme()
+    date = (FICHIER, FICHIER.stat().st_mtime)
     if _cache["date"] == date:
         return _cache["baremes"]
     wb = openpyxl.load_workbook(FICHIER, read_only=True, data_only=True)
@@ -125,17 +143,47 @@ def conflits():
 
 
 def item_du_bareme(epreuve, question):
-    """Le barème de l'item de cette question ({} si l'item est vide), ou None s'il est introuvable."""
-    return baremes().get(epreuve, {}).get(cle_item(question))
+    """Le barème de l'item de cette question ({} si l'item est vide), ou None s'il est introuvable.
+    Un item dont les mots diffèrent d'une lettre au plus est accepté (BROCOLI / BROCCOLI)."""
+    items = baremes().get(epreuve, {})
+    cle = cle_item(question)
+    if cle in items:
+        return items[cle]
+    for autre, bareme in items.items():
+        if len(autre) == len(cle) and all(a == b or _une_lettre(a, b) for a, b in zip(autre, cle)):
+            return bareme
+    return None
+
+
+PARTIES_NOTEES = {"test", "entrainement"}  # l'entraînement est noté, mais pas compté dans les totaux
 
 
 def score_similitudes(epreuve, partie, question, reponse):
-    if partie != "test" or question is None:
-        return None
-    bareme = item_du_bareme(epreuve, question)
-    if not bareme:          # item introuvable, ou sans réponses dans le barème (BRAS / JAMBE...)
+    if partie not in PARTIES_NOTEES or question is None:
         return None
     cle = simplifier(reponse or "", LANGUE[epreuve])
     if not cle:
-        return 0            # réponse vide (temps écoulé)
-    return bareme.get(cle)  # None = à coter à la main
+        return 0                    # réponse vide (temps écoulé)
+    bareme = item_du_bareme(epreuve, question)
+    if not bareme:                  # item introuvable ou sans réponses dans le barème
+        return A_VERIFIER
+    if cle in bareme:
+        return bareme[cle]
+    if " " not in cle and any(points > 0 and " " not in mot and _une_lettre(cle, mot)
+                              for mot, points in bareme.items()):
+        return ORTHOGRAPHE
+    return A_VERIFIER
+
+
+def _une_lettre(a, b):
+    """True si a et b diffèrent d'exactement une lettre (en plus, en moins ou différente)."""
+    if a == b or abs(len(a) - len(b)) > 1:
+        return False
+    if len(a) == len(b):
+        return sum(x != y for x, y in zip(a, b)) == 1
+    if len(a) > len(b):
+        a, b = b, a                       # a = le plus court
+    i = 0
+    while i < len(a) and a[i] == b[i]:
+        i += 1
+    return a[i:] == b[i + 1:]

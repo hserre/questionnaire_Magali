@@ -4,7 +4,7 @@ import { styleBoutonContinuer } from "./InterfaceUtils";
 import { API_URL } from "../config";
 import { ligne, enregistrerLignes, enregistrerDureeTotale } from "./sauvegarde";
 import Consentement from "./Consentement";
-import { VERSION_INFORMATIVA } from "./informativaConsenso";
+import { DOCUMENTI, VERSIONE_DOCUMENTI } from "./documentiConsenso";
 
 // Le questionnaire d'accueil est enregistré dans la table des épreuves,
 // une ligne par question, sous ce nom d'épreuve
@@ -270,8 +270,10 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
   const debutQuestion = useRef(null);
   const debutAccueil = useRef(null);
   const dureeMadrelingua = useRef(null);
-  // Réponses de la page de consentement, enregistrées dès que le code existe
-  const consentement = useRef(null);
+  // Documents de consentement : index du document affiché (sousPage "documenti")
+  // et temps passé sur chacun, enregistrés dès que le code existe
+  const [indexDocumento, setIndexDocumento] = useState(0);
+  const consentement = useRef({});
 
   useEffect(() => {
     if (sousPage === 2 || sousPage === 4) {
@@ -351,17 +353,20 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
       setSousPage("exclu");
       return;
     }
-    setSousPage("consentement");
+    // Consentement déjà donné (documents au début) : création du code participant
+    creerCodeEtEnregistrer();
   };
 
-  // Page de consentement : sans consentement, la participation s'arrête ici.
-  // Avec consentement : création du code participant, affiché sur la page suivante
-  const validerConsentement = (reponse) => {
-    consentement.current = reponse;
-    if (reponse.consenso === "presta") {
-      creerCodeEtEnregistrer();
+  // Documents de consentement : "Continua" passe au document suivant,
+  // puis à la question sur la langue maternelle après le dernier.
+  // (Sans consentement, le participant ferme simplement la page.)
+  const validerDocumento = ({ duree }) => {
+    consentement.current[DOCUMENTI[indexDocumento].id] = duree;
+    if (indexDocumento < DOCUMENTI.length - 1) {
+      setIndexDocumento(indexDocumento + 1);
+      window.scrollTo(0, 0);
     } else {
-      setSousPage("refus");
+      setSousPage(2);
     }
   };
 
@@ -381,19 +386,21 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
           reponse: madrelingua,
           duree_reponse: dureeMadrelingua.current,
         }),
-        // Preuve du consentement : version de l'informativa, cases cochées,
-        // temps passé sur la page (l'horodatage de la ligne donne la date)
-        ...[
-          ["versione_informativa", VERSION_INFORMATIVA],
-          ["informativa_letta", consentement.current.informativaLetta ? 1 : 0],
-          ["consenso_trattamento_dati", consentement.current.consenso],
-        ].map(([question, reponse]) =>
+        // Preuve du consentement : version des documents, puis une ligne par
+        // document accepté (1) avec le temps passé dessus (l'horodatage donne la date)
+        ligne({
+          participant: nouveauCode,
+          epreuve: "Consentement",
+          question: "versione_documenti",
+          reponse: VERSIONE_DOCUMENTI,
+        }),
+        ...DOCUMENTI.map((doc) =>
           ligne({
             participant: nouveauCode,
             epreuve: "Consentement",
-            question,
-            reponse,
-            duree_reponse: consentement.current.duree,
+            question: doc.id,
+            reponse: 1,
+            duree_reponse: consentement.current[doc.id] ?? null,
           })
         ),
       ]);
@@ -635,7 +642,7 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
       >
         <h1><b>Benvenuto/a sul nostro questionario!</b></h1>
 
-        <button onClick={() => setSousPage(2)} style={styleBoutonContinuer}>
+        <button onClick={() => setSousPage("documenti")} style={styleBoutonContinuer}>
           Inizia
         </button>
       </div>
@@ -669,8 +676,14 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
     );
   }
 
-  if (sousPage === "consentement") {
-    return <Consentement onConfirme={validerConsentement} />;
+  if (sousPage === "documenti") {
+    return (
+      <Consentement
+        key={indexDocumento} // nouveau document : case décochée, chrono remis à zéro
+        documento={DOCUMENTI[indexDocumento]}
+        onContinua={validerDocumento}
+      />
+    );
   }
 
   if (sousPage === "code") {
@@ -707,23 +720,6 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
 
         <button onClick={() => setSousPage(3)} style={styleBoutonContinuer}>
           Continua
-        </button>
-      </div>
-    );
-  }
-
-  if (sousPage === "refus") {
-    return (
-      <div className="instructions">
-        <h2>
-          Grazie per il tuo interesse. Senza il tuo consenso al trattamento dei
-          dati personali non è possibile partecipare alla ricerca.
-        </h2>
-        <button
-          onClick={() => setSousPage("consentement")}
-          style={styleBoutonContinuer}
-        >
-          Torna all’informativa
         </button>
       </div>
     );

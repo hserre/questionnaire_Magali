@@ -263,9 +263,11 @@ export default function TestBarrage({ participant, onComplete }) {
 
   // Une ligne par forme sélectionnée, dans l'ordre des clics :
   //  partie        = "exercice" ou "test"
-  //  question      = rang du clic (1 = première forme cliquée)
-  //  reponse       = position de la forme dans la grille (1 = en haut à gauche,
-  //                  ligne par ligne ; 1 à 180 pour le test, 1 à 21 pour l'exercice)
+  //  question / reponse : vides
+  //  position_symbole  = position de la forme dans la grille (1 = en haut à gauche,
+  //                      ligne par ligne ; 1 à 180 pour le test, 1 à 21 pour l'exercice)
+  //  position_question = rang du clic (1 = première forme cliquée)
+  //  is_correct        = 1 si la forme cliquée est une cible, 0 sinon
   //  duree_reponse = ms entre l'affichage de la grille et ce clic
   //  nb_symboles_selectionnes / nb_symboles_selectionnes_corrects : totaux, répétés sur chaque ligne
   // Aucune forme sélectionnée (temps écoulé) : une seule ligne, reponse vide, totaux à 0.
@@ -285,8 +287,9 @@ export default function TestBarrage({ participant, onComplete }) {
         ? selected.map((index, rang) =>
             ligne({
               ...commun,
-              question: rang + 1,
-              reponse: index + 1,
+              position_question: rang + 1,
+              position_symbole: index + 1,
+              is_correct: isTarget(grid[index]) ? 1 : 0,
               duree_reponse: tempsClics.current[index] ?? null,
               time_stamp:
                 tempsClics.current[index] != null

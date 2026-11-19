@@ -19,7 +19,7 @@ const CONTENU = {
       "Passiamo ora alla prova di <b>comprensione del testo</b>. <br></br>Leggi i seguenti articoli, tratti dal Regolamento del Premio Strega, e <b>indica se l’affermazione corrispondente è Vera (V) o Falsa (F)</b>. <br></br>Vedrai prima un esempio e passerai al test.",
     exemple: {
       texte:
-        "<em>Art. 1.</em> Il Premio Strega ha sede presso la Fondazione Maria e Goffredo Bellonci (Roma, via Fratelli Ruspoli 2).",
+        "Il Premio Strega ha sede presso la Fondazione Maria e Goffredo Bellonci (Roma, via Fratelli Ruspoli 2).",
       affirmation: "Il Premio Strega ha sede a Verona, via Fratelli Ruspoli 2.",
       correct: "faux",
       retourErreur: "No, il Premio Strega ha sede a Roma.",
@@ -28,41 +28,41 @@ const CONTENU = {
     articles: [
       {
         texte:
-          "<em>Art. 2.</em> È istituito a Roma il Premio letterario Strega degli “Amici della domenica”, nome con cui sono identificati i componenti della giuria dal gruppo che si riuniva in casa Bellonci il pomeriggio della domenica.",
+          "È istituito a Roma il Premio letterario Strega degli “Amici della domenica”, nome con cui sono identificati i componenti della giuria dal gruppo che si riuniva in casa Bellonci il pomeriggio della domenica.",
         affirmation: "Il gruppo si riuniva in casa Bellonci il sabato pomeriggio.",
         correct: "faux",
       },
       {
         texte:
-          "<em>Art. 3.</em> La giuria era composta alla data di fondazione del Premio (1947) da centosettanta “Amici” e comprende attualmente quattrocento votanti.",
+          "La giuria era composta alla data di fondazione del Premio (1947) da centosettanta “Amici” e comprende attualmente quattrocento votanti.",
         affirmation:
           "Il numero dei membri della giuria del Premio ha registrato un netto aumento nel corso degli anni.",
         correct: "vrai",
       },
       {
         texte:
-          "<em>Art. 4.</em> Il Premio è assegnato annualmente a un libro di narrativa scritto in lingua italiana.",
+          "Il Premio è assegnato annualmente a un libro di narrativa scritto in lingua italiana.",
         affirmation:
           "Il Premio viene assegnato ogni semestre a un libro di narrativa scritto in italiano.",
         correct: "faux",
       },
       {
         texte:
-          "<em>Art. 5.</em> Le opere in concorso sono pubblicate in prima edizione tra il 1° aprile dell’anno precedente e il 31 marzo dell’anno in corso.",
+          "Le opere in concorso sono pubblicate in prima edizione tra il 1° aprile dell’anno precedente e il 31 marzo dell’anno in corso.",
         affirmation:
           "Le opere ammesse al concorso devono essere state pubblicate al più tardi nel mese di marzo dell’anno precedente.",
         correct: "faux",
       },
       {
         texte:
-          "<em>Art. 6.</em> La prima votazione è scrutinata presso la Fondazione Bellonci; la seconda votazione e la proclamazione del vincitore si svolgono a Roma, in sede scelta dal Comitato direttivo.",
+          "La prima votazione è scrutinata presso la Fondazione Bellonci; la seconda votazione e la proclamazione del vincitore si svolgono a Roma, in sede scelta dal Comitato direttivo.",
         affirmation:
           "Le operazioni di spoglio di tutti i turni delle votazioni si svolgono presso la sede della Fondazione Bellonci.",
         correct: "faux",
       },
       {
         texte:
-          "<em>Art. 7.</em> Gli scrittori che hanno vinto il Premio Strega non possono concorrere se non dopo tre edizioni successive.",
+          "Gli scrittori che hanno vinto il Premio Strega non possono concorrere se non dopo tre edizioni successive.",
         affirmation:
           "I vincitori del Premio Strega possono concorrere nuovamente dopo tre edizioni dalla loro vincita.",
         correct: "vrai",
@@ -77,42 +77,42 @@ const CONTENU = {
     articles: [
       {
         texte:
-          "<em>Art. 1.</em> L’accueil des familles débute à 8h dans les espaces prévus, puis les élèves sont pris en charge dans les classes à partir de 8h05 en élémentaire et 8h10 en maternelle.",
+          "L’accueil des familles débute à 8h dans les espaces prévus, puis les élèves sont pris en charge dans les classes à partir de 8h05 en élémentaire et 8h10 en maternelle.",
         affirmation:
           "En maternelle, les enfants sont pris en charge dans les classes par les enseignants à partir de 8h10.",
         correct: "vrai",
       },
       {
         texte:
-          "<em>Art. 2.</em> Lorsqu’une tierce personne est chargée de récupérer l’élève, il convient d’en informer préalablement l’enseignant et d’adresser une autorisation par courriel.",
+          "Lorsqu’une tierce personne est chargée de récupérer l’élève, il convient d’en informer préalablement l’enseignant et d’adresser une autorisation par courriel.",
         affirmation:
           "Lorsqu’une tierce personne vient chercher un enfant, elle doit uniquement présenter la carte de l’établissement.",
         correct: "faux",
       },
       {
         texte:
-          "<em>Art. 3.</em> Une garderie payante est proposée jusqu’à 18h du lundi au vendredi et, en cas d’imprévu, les familles doivent prévenir l’école dans les meilleurs délais.",
+          "Une garderie payante est proposée jusqu’à 18h du lundi au vendredi et, en cas d’imprévu, les familles doivent prévenir l’école dans les meilleurs délais.",
         affirmation:
           "Une garderie gratuite accueille les enfants jusqu’à 18h du lundi au vendredi.",
         correct: "faux",
       },
       {
         texte:
-          "<em>Art. 4.</em> Concernant le ramassage scolaire, la responsabilité de l’établissement prend effet à l’accueil des élèves dans les classes et s’achève à la fin des cours.",
+          "Concernant le ramassage scolaire, la responsabilité de l’établissement prend effet à l’accueil des élèves dans les classes et s’achève à la fin des cours.",
         affirmation:
           "L’école n’est pas responsable des élèves utilisant le ramassage scolaire avant l’heure d’accueil en classe et après la sortie.",
         correct: "vrai",
       },
       {
         texte:
-          "<em>Art. 5.</em> En cas d’absence, les familles doivent informer l’établissement par écrit en précisant le motif et la durée prévisible.",
+          "En cas d’absence, les familles doivent informer l’établissement par écrit en précisant le motif et la durée prévisible.",
         affirmation:
           "Lors d’une absence de courte durée, l’école enverra aux familles du travail à effectuer à la maison.",
         correct: "faux",
       },
       {
         texte:
-          "<em>Art. 6.</em> La restauration scolaire est un service facultatif dont l’inscription s’effectue via la plateforme Eduka.",
+          "La restauration scolaire est un service facultatif dont l’inscription s’effectue via la plateforme Eduka.",
         affirmation: "L’inscription à la cantine s’effectue sur une plateforme.",
         correct: "vrai",
       },
@@ -158,11 +158,24 @@ const MESSAGES_FIN = {
 const HAUTEUR_CONTENU = "40svh";
 const HAUTEUR_BOUTON = "20svh";
 
+// Mélange une copie du tableau (Fisher-Yates)
+function melanger(tableau) {
+  const copie = [...tableau];
+  for (let i = copie.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copie[i], copie[j]] = [copie[j], copie[i]];
+  }
+  return copie;
+}
+
 export default function ArticlesVraiFaux({ participant, tour, onComplete }) {
   // Italien (avec exemple) si tour === 1, français (sans exemple) sinon
   const langue = Number(tour) === 1 ? "it" : "fr";
   const t = TEXTES[langue];
   const contenu = CONTENU[langue];
+  // Articles du test dans un ordre aléatoire, tiré une fois par participant ;
+  // chaque article reste avec son affirmation (l'exemple n'est pas mélangé)
+  const [articles] = useState(() => melanger(contenu.articles));
 
   // phase : "exemple" (italien uniquement) puis "test"
   const [phase, setPhase] = useState(contenu.exemple ? "exemple" : "test");
@@ -176,9 +189,13 @@ export default function ArticlesVraiFaux({ participant, tour, onComplete }) {
 
   const EPREUVE = `ComprehensionTexte_${suffixeLangue(tour)}`;
 
-  // debutArticle : affichage du texte de l'article en cours (lecture + réponse)
+  // debutArticle : affichage du texte de l'article en cours
+  // debutAffirmation : affichage de l'affirmation (après « Continua » sur l'article)
+  // dureeLecture : de l'affichage de l'article au clic sur « Continua »
   // debutEpreuve : affichage du premier article du test
   const debutArticle = useRef(null);
+  const debutAffirmation = useRef(null);
+  const dureeLecture = useRef(null);
   const debutEpreuve = useRef(null);
 
   useEffect(() => {
@@ -189,7 +206,7 @@ export default function ArticlesVraiFaux({ participant, tour, onComplete }) {
   }, [page, phase, indexArticle]);
 
   const enExemple = phase === "exemple";
-  const item = enExemple ? contenu.exemple : contenu.articles[indexArticle];
+  const item = enExemple ? contenu.exemple : articles[indexArticle];
   const reponseActuelle = enExemple ? reponseExemple : reponses[indexArticle];
   const aRepondu = OPTIONS.includes(reponseActuelle);
 
@@ -208,7 +225,7 @@ export default function ArticlesVraiFaux({ participant, tour, onComplete }) {
   // Une ligne par article du test (l'exemple n'est pas enregistré)
   const saveData = (index, reponse) => {
     const maintenant = Date.now();
-    const dernier = index + 1 >= contenu.articles.length;
+    const dernier = index + 1 >= articles.length;
     const dureeTotale = dernier ? maintenant - debutEpreuve.current : null;
 
     enregistrerLignes([
@@ -216,9 +233,12 @@ export default function ArticlesVraiFaux({ participant, tour, onComplete }) {
         participant,
         epreuve: EPREUVE,
         partie: "test",
-        question: contenu.articles[index].affirmation,
+        question: articles[index].affirmation,
+        position_question: index + 1, // rang de l'article dans l'ordre aléatoire
         reponse,
-        duree_reponse: maintenant - debutArticle.current,
+        // réponse : de l'affichage de l'affirmation au clic de confirmation
+        duree_reponse: maintenant - debutAffirmation.current,
+        duree_lecture: dureeLecture.current,
         duree_totale_epreuve: dureeTotale,
       }),
     ]).then(() => {
@@ -235,7 +255,7 @@ export default function ArticlesVraiFaux({ participant, tour, onComplete }) {
 
     saveData(indexArticle, reponses[indexArticle]);
 
-    if (indexArticle + 1 < contenu.articles.length) {
+    if (indexArticle + 1 < articles.length) {
       setIndexArticle((i) => i + 1);
       setPage("article");
     } else {
@@ -379,7 +399,14 @@ export default function ArticlesVraiFaux({ participant, tour, onComplete }) {
         </>
       ),
       texteBouton: t.continuer,
-      onClick: () => setPage("affirmation"),
+      onClick: () => {
+        if (!enExemple) {
+          const maintenant = Date.now();
+          dureeLecture.current = maintenant - debutArticle.current;
+          debutAffirmation.current = maintenant;
+        }
+        setPage("affirmation");
+      },
     });
   }
 
