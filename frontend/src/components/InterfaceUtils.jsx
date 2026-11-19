@@ -131,7 +131,7 @@ export function InterfaceCroix({
         
         {infoAAfficher === "Prononciation" && (
           <audio 
-            src={`/Entry_data/audio_all/${motCentral}.mp3`}
+            src={`${import.meta.env.BASE_URL}Entry_data/audio_all/${motCentral}.mp3`}
             autoPlay 
             style={{ display: "none" }} 
           />

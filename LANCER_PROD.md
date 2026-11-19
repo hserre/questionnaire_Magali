@@ -14,8 +14,16 @@ Pas de ngrok, pas de `npm run dev`.
     source ../.venv/bin/activate
     uvicorn main:app --port 8000
 
-L'expérience est sur http://localhost:8000
-(raccourci de test : http://localhost:8000/?etape=Vocabulaire).
+L'expérience est sur http://localhost:8000/questionnaire/
+(raccourci de test : http://localhost:8000/questionnaire/?etape=Vocabulaire).
+
+## Chemin /questionnaire/
+
+Sur le serveur, l'expérience est à http://adresse/questionnaire/ (le proxy y envoie les
+participants). Ce préfixe est fixé à deux endroits, à garder identiques :
+- frontend/vite.config.js : `const BASE = "/questionnaire/";` (puis relancer npm run build)
+- backend/main.py : `PREFIXE` (variable d'environnement PREFIXE_URL, "/questionnaire" par défaut)
+Que le proxy transmette le préfixe à FastAPI ou le retire, les deux fonctionnent.
 
 Sur une machine virtuelle / un serveur, pour qu'elle soit accessible depuis d'autres
 ordinateurs : `uvicorn main:app --host 0.0.0.0 --port 8000`.

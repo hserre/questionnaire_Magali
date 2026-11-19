@@ -208,7 +208,7 @@ export default function Similitudes({ participant, isDys, onComplete, tour }) {
                 <video
                     style={{ border: "1px solid black" }}
                     ref={videoRef}
-                    src="/videos/exemple_similitudes.mov"
+                    src={`${import.meta.env.BASE_URL}videos/exemple_similitudes.mov`}
                     width="900"
                     playsInline
                     controls

@@ -223,7 +223,7 @@ export default function Vocabulaire({ participant, onComplete, tour }) {
                 <video
                     style={{ border: "1px solid black" }}
                     ref={videoRef}
-                    src="/videos/exemple_vocabulaire.mov"
+                    src={`${import.meta.env.BASE_URL}videos/exemple_vocabulaire.mov`}
                     width="900"
                     playsInline
                     controls

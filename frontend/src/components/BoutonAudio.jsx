@@ -10,7 +10,7 @@ export default function BoutonAudio({ fichier }) {
   const [disponible, setDisponible] = useState(true);
 
   useEffect(() => {
-    const audio = new Audio(`/audios_consignes/${fichier}`);
+    const audio = new Audio(`${import.meta.env.BASE_URL}audios_consignes/${fichier}`);
     audio.preload = "auto";
     audio.onplay = () => setEnLecture(true);
     audio.onpause = () => setEnLecture(false);

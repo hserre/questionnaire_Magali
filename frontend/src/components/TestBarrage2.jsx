@@ -389,7 +389,7 @@ export default function TestBarrage({ participant, onComplete }) {
         <video
           style={{ border: "1px solid black" }}
           ref={videoRef}
-          src="/videos/exemple_barrage2.mov"
+          src={`${import.meta.env.BASE_URL}videos/exemple_barrage2.mov`}
           width="900"
           playsInline
           controls

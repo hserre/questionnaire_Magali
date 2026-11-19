@@ -219,7 +219,7 @@ function handleDragFromDropZone(reponse, questionId) {
             <h2 style={{marginBottom:'3svh'}}>Avvia il video e guarda l'esempio. Se necessario, puoi rivederlo. Dopodiché toccherà a te.</h2>
             <video style={{border: "1px solid black"}}
                 ref={videoRef}
-                src="/videos/exemple_comprehension.mov"
+                src={`${import.meta.env.BASE_URL}videos/exemple_comprehension.mov`}
                 width="900"
                 playsInline
                 controls

@@ -20,6 +20,29 @@ from exports import regenerer_en_arriere_plan
 
 app = FastAPI()
 
+
+# Préfixe de l'expérience sur le serveur (ex. http://adresse/questionnaire/).
+# Que le proxy le transmette ou le retire, les adresses /questionnaire/api/... et /api/...
+# arrivent aux mêmes routes. Doit correspondre à "base" dans frontend/vite.config.js.
+PREFIXE = os.environ.get("PREFIXE_URL", "/questionnaire").rstrip("/")
+
+
+class RetirerPrefixe:
+    def __init__(self, app, prefixe):
+        self.app, self.prefixe = app, prefixe
+
+    async def __call__(self, scope, receive, send):
+        if self.prefixe and scope["type"] in ("http", "websocket"):
+            chemin = scope["path"]
+            if chemin == self.prefixe or chemin.startswith(self.prefixe + "/"):
+                scope = dict(scope)
+                scope["path"] = chemin[len(self.prefixe):] or "/"
+                scope["raw_path"] = scope["path"].encode()
+        await self.app(scope, receive, send)
+
+
+app.add_middleware(RetirerPrefixe, prefixe=PREFIXE)
+
 DOSSIER_BACKEND = Path(__file__).resolve().parent
 
 # Audios : seuls les dossiers d'audios d'Entry_data sont publiés

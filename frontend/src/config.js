@@ -1,3 +1,5 @@
-// Adresse du serveur : vide = le même serveur que celui qui envoie les pages (FastAPI).
-// Fonctionne sur http://localhost:8000 comme sur un serveur, sans rien changer.
-export const API_URL = "";
+// Préfixe de l'expérience sur le serveur, fixé par "base" dans vite.config.js
+// (ex. "/questionnaire/" : l'expérience est sur http://adresse/questionnaire/).
+// API_URL = préfixe sans la barre finale, devant toutes les adresses /api/...
+export const BASE = import.meta.env.BASE_URL;
+export const API_URL = BASE.replace(/\/$/, "");

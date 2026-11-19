@@ -422,7 +422,7 @@ export default function App() {
           <br></br> Puoi chiudere la pagina.
         </h1 >
         <img
-            src="/videos/fireworks.gif"
+            src={`${import.meta.env.BASE_URL}videos/fireworks.gif`}
             alt="Description du GIF"
             style={{ width: "500px",
               marginTop:"5svh"}}
