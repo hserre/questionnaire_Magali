@@ -155,10 +155,6 @@ export default function Vocabulaire({ participant, onComplete, tour }) {
             .slice(0, indexEssai + 1)
             .filter((m) => m.partie === essai.partie).length;
 
-        // Position (1 à 3) de la bonne réponse parmi les options affichées
-        const indexBonne = [essai.option1, essai.option2, essai.option3].findIndex(
-            (o) => String(o) === String(essai.reponse)
-        );
 
         // Dernier essai de l'épreuve : on calcule la durée totale
         const dernier = !mots.slice(indexEssai + 1).some(estEssai);
@@ -174,7 +170,9 @@ export default function Vocabulaire({ participant, onComplete, tour }) {
                 duree_reponse: tempsReaction,
                 time_stamp: chrono(tempsDebut + tempsReaction),
                 position_question: position,
-                position_bonne_reponse: indexBonne >= 0 ? indexBonne + 1 : null,
+                // propositions dans l'ordre affiché : le serveur en déduit la position
+                // de la bonne réponse (qui n'est pas envoyée au navigateur)
+                options: [essai.option1, essai.option2, essai.option3],
                 duree_totale_epreuve: dureeTotale,
             }),
         ]).then(() => {

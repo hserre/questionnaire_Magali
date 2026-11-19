@@ -1,4 +1,5 @@
 import os
+import random
 from pathlib import Path
 from typing import List, Optional, Union
 
@@ -90,6 +91,7 @@ class Ligne(BaseModel):
     duree_totale_epreuve: Optional[float] = None
     duree_seance: Optional[float] = None
     time_stamp: Optional[float] = None
+    options: Optional[List[Valeur]] = None  # Vocabulaire : propositions dans l'ordre affiché (non stockées)
 
 
 class Lignes(BaseModel):
@@ -108,15 +110,41 @@ def get_stimuli(etape: str, tour: int = Query(None)):
         essais = charger_essais_etape(etape, tour)
         if not essais:
             raise HTTPException(status_code=404, detail="Étape non trouvée ou fichier manquant")
-        return essais
-    elif etape in {'checkEmail', 'checkCodes', 'checkCodesUsed'}:
-        return charger_essais_etape(etape)
+        return sans_bonnes_reponses(etape, essais)
     raise HTTPException(status_code=404, detail="Étape inconnue")
+
+
+def sans_bonnes_reponses(etape, essais):
+    """Les bonnes réponses ne sont pas envoyées au navigateur (on pourrait les lire
+    dans les outils de développement). Le score est calculé par le serveur."""
+    for essai in essais:
+        essai.pop("Distractor_1", None)
+        essai.pop("Distractor_2", None)
+        if etape != "Comprehension":
+            essai.pop("reponse", None)
+    if etape == "Comprehension":
+        # Le navigateur a besoin des réponses du test (ce sont les étiquettes à glisser),
+        # mais pas de savoir à quelle question chacune correspond : on les mélange
+        tests = [e for e in essais if e.get("partie") == "test"]
+        reponses = [e.get("reponse") for e in tests]
+        random.shuffle(reponses)
+        for e, r in zip(tests, reponses):
+            e["reponse"] = r
+    return essais
+
+
+def verifier_participant(participant):
+    """Refuse les données d'un code participant qui n'a pas été créé par l'accueil
+    (sauf TEST, le raccourci de test protégé par une clé)."""
+    if str(participant) != "TEST" and not code_existe(str(participant)):
+        raise HTTPException(status_code=403, detail="Code participant inconnu")
 
 
 # Toutes les épreuves enregistrent ici : une ou plusieurs lignes par appel
 @app.post("/api/sauvegarder")
 def sauvegarder(data: Lignes):
+    for participant in {l.participant for l in data.lignes}:
+        verifier_participant(participant)
     try:
         lignes = [ligne.model_dump() if hasattr(ligne, "model_dump") else ligne.dict()
                   for ligne in data.lignes]
@@ -135,6 +163,7 @@ class DureeSeance(BaseModel):
 # Appelé à la fin de l'expérience : remplit duree_seance sur toutes les lignes du participant
 @app.post("/api/duree_seance")
 def duree_seance(data: DureeSeance):
+    verifier_participant(data.participant)
     try:
         maj_duree_seance(data.participant, data.duree_seance)
         regenerer_en_arriere_plan()
@@ -145,6 +174,7 @@ def duree_seance(data: DureeSeance):
 
 @app.post("/api/duree_epreuve")
 def duree_epreuve(data: DureeTotale):
+    verifier_participant(data.participant)
     try:
         maj_duree_totale(data.participant, data.epreuve, data.duree_totale_epreuve)
         return {"status": "success"}

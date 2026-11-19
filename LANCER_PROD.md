@@ -15,7 +15,8 @@ Pas de ngrok, pas de `npm run dev`.
     uvicorn main:app --port 8000
 
 L'expérience est sur http://localhost:8000/questionnaire/
-(raccourci de test : http://localhost:8000/questionnaire/?etape=Vocabulaire).
+(raccourci de test : http://localhost:8000/questionnaire/?etape=Vocabulaire&cle=LA_CLE ;
+sans la bonne clé, le raccourci est ignoré. La clé n'est écrite dans aucun fichier du projet.)
 
 ## Chemin /questionnaire/
 

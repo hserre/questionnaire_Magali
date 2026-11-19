@@ -10,7 +10,9 @@ import {
 
 // ---------------------------------------------------------------------------
 // Contenu des épreuves : italien (tour === 1, avec exemple) et français (sinon, sans exemple)
-// "correct" = bonne réponse attendue ("vrai" ou "faux"), non affichée aux participants
+// "correct" = bonne réponse attendue ("vrai" ou "faux") : seulement pour l'exemple (retour au
+// participant). Pour le test, elle n'est pas dans le code envoyé au navigateur : le score est
+// calculé par le serveur (backend/Entry_data/reponses_comprehension_texte*.xlsx).
 // ---------------------------------------------------------------------------
 const CONTENU = {
   it: {
@@ -30,42 +32,36 @@ const CONTENU = {
         texte:
           "È istituito a Roma il Premio letterario Strega degli “Amici della domenica”, nome con cui sono identificati i componenti della giuria dal gruppo che si riuniva in casa Bellonci il pomeriggio della domenica.",
         affirmation: "Il gruppo si riuniva in casa Bellonci il sabato pomeriggio.",
-        correct: "faux",
       },
       {
         texte:
           "La giuria era composta alla data di fondazione del Premio (1947) da centosettanta “Amici” e comprende attualmente quattrocento votanti.",
         affirmation:
           "Il numero dei membri della giuria del Premio ha registrato un netto aumento nel corso degli anni.",
-        correct: "vrai",
       },
       {
         texte:
           "Il Premio è assegnato annualmente a un libro di narrativa scritto in lingua italiana.",
         affirmation:
           "Il Premio viene assegnato ogni semestre a un libro di narrativa scritto in italiano.",
-        correct: "faux",
       },
       {
         texte:
           "Le opere in concorso sono pubblicate in prima edizione tra il 1° aprile dell’anno precedente e il 31 marzo dell’anno in corso.",
         affirmation:
           "Le opere ammesse al concorso devono essere state pubblicate al più tardi nel mese di marzo dell’anno precedente.",
-        correct: "faux",
       },
       {
         texte:
           "La prima votazione è scrutinata presso la Fondazione Bellonci; la seconda votazione e la proclamazione del vincitore si svolgono a Roma, in sede scelta dal Comitato direttivo.",
         affirmation:
           "Le operazioni di spoglio di tutti i turni delle votazioni si svolgono presso la sede della Fondazione Bellonci.",
-        correct: "faux",
       },
       {
         texte:
           "Gli scrittori che hanno vinto il Premio Strega non possono concorrere se non dopo tre edizioni successive.",
         affirmation:
           "I vincitori del Premio Strega possono concorrere nuovamente dopo tre edizioni dalla loro vincita.",
-        correct: "vrai",
       },
     ],
   },
@@ -80,41 +76,35 @@ const CONTENU = {
           "L’accueil des familles débute à 8h dans les espaces prévus, puis les élèves sont pris en charge dans les classes à partir de 8h05 en élémentaire et 8h10 en maternelle.",
         affirmation:
           "En maternelle, les enfants sont pris en charge dans les classes par les enseignants à partir de 8h10.",
-        correct: "vrai",
       },
       {
         texte:
           "Lorsqu’une tierce personne est chargée de récupérer l’élève, il convient d’en informer préalablement l’enseignant et d’adresser une autorisation par courriel.",
         affirmation:
           "Lorsqu’une tierce personne vient chercher un enfant, elle doit uniquement présenter la carte de l’établissement.",
-        correct: "faux",
       },
       {
         texte:
           "Une garderie payante est proposée jusqu’à 18h du lundi au vendredi et, en cas d’imprévu, les familles doivent prévenir l’école dans les meilleurs délais.",
         affirmation:
           "Une garderie gratuite accueille les enfants jusqu’à 18h du lundi au vendredi.",
-        correct: "faux",
       },
       {
         texte:
           "Concernant le ramassage scolaire, la responsabilité de l’établissement prend effet à l’accueil des élèves dans les classes et s’achève à la fin des cours.",
         affirmation:
           "L’école n’est pas responsable des élèves utilisant le ramassage scolaire avant l’heure d’accueil en classe et après la sortie.",
-        correct: "vrai",
       },
       {
         texte:
           "En cas d’absence, les familles doivent informer l’établissement par écrit en précisant le motif et la durée prévisible.",
         affirmation:
           "Lors d’une absence de courte durée, l’école enverra aux familles du travail à effectuer à la maison.",
-        correct: "faux",
       },
       {
         texte:
           "La restauration scolaire est un service facultatif dont l’inscription s’effectue via la plateforme Eduka.",
         affirmation: "L’inscription à la cantine s’effectue sur une plateforme.",
-        correct: "vrai",
       },
     ],
   },

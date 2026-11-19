@@ -88,6 +88,10 @@ def init_db():
 
 def convertir_en_secondes():
     """Base d'avant le 17/11 : temps en millisecondes -> secondes. Copie de la base avant."""
+    with _connexion() as conn, conn:
+        if conn.execute(f"SELECT COUNT(*) FROM {TABLE}").fetchone()[0] == 0:
+            conn.execute(f"PRAGMA user_version = {VERSION_SECONDES}")  # base neuve : rien à convertir
+            return
     copie = DB_NAME.replace(".db", f"_avant_secondes_{time.strftime('%Y-%m-%d_%Hh%M')}.db")
     with _connexion() as conn, closing(sqlite3.connect(copie)) as dest:
         conn.backup(dest)
@@ -148,6 +152,8 @@ def sauvegarder_lignes(lignes):
     valeurs = []
     for ligne in lignes:
         l = {c: ligne.get(c) for c in COLONNES_FRONT}
+        if l.get("position_bonne_reponse") is None and ligne.get("options"):
+            l["position_bonne_reponse"] = _position_bonne(l, ligne["options"])
         for c in COLONNES_TEMPS:
             l[c] = en_secondes(l[c])
         texte = l["question"]
@@ -163,6 +169,22 @@ def sauvegarder_lignes(lignes):
             """,
             valeurs,
         )
+
+
+def _position_bonne(l, options):
+    """Vocabulaire : place (1 à 3) de la bonne réponse parmi les propositions affichées.
+    Calculée ici, car les bonnes réponses ne sont plus envoyées au navigateur."""
+    try:
+        from scores import bonnes_reponses, normaliser
+        bonne = (bonnes_reponses(l["epreuve"]) or {}).get(normaliser(l["question"]))
+        if bonne is None:
+            return None
+        for i, o in enumerate(options, start=1):
+            if normaliser(o) == bonne:
+                return i
+    except Exception as e:
+        print(f"[position] calcul impossible ({l.get('epreuve')}) : {e}")
+    return None
 
 
 def _identifiant(l):

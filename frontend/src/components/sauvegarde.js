@@ -30,6 +30,8 @@ export function ligne({
   duree_totale_epreuve = null,
   duree_seance = null,
   time_stamp = chrono(), // par défaut : moment où la ligne est construite
+  options = null, // Vocabulaire : propositions dans l'ordre affiché (le serveur en déduit
+                  // la position de la bonne réponse ; elles ne sont pas stockées)
 }) {
   return {
     participant: String(participant),
@@ -48,6 +50,7 @@ export function ligne({
     duree_totale_epreuve,
     duree_seance,
     time_stamp,
+    options,
   };
 }
 

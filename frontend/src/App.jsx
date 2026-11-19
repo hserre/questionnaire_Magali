@@ -69,11 +69,29 @@ function nomEtape(index) {
 }
 
 // Accès direct à une étape, pour tester : ajouter à l'adresse
-//   ?etape=Vocabulaire          (premier passage : italien)
-//   ?etape=Vocabulaire&tour=2   (deuxième passage : français)
+//   ?etape=Vocabulaire&cle=…          (premier passage : italien)
+//   ?etape=Vocabulaire&tour=2&cle=…   (deuxième passage : français)
 // La page d'accueil est sautée ; les réponses sont enregistrées sous le participant "TEST".
+// En production, le raccourci ne marche qu'avec la bonne clé (sinon l'expérience commence
+// normalement par l'accueil et le consentement). Le code ne contient qu'une empreinte de la
+// clé, pas la clé elle-même. Avec "npm run dev", la clé n'est pas demandée.
+function empreinte(texte) {
+  // empreinte "cyrb53" (non cryptographique, mais la clé n'apparaît pas dans le code)
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < texte.length; i++) {
+    const c = texte.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 2654435761);
+    h2 = Math.imul(h2 ^ c, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+}
+const EMPREINTE_CLE_TEST = 166686062134712;
 const parametresUrl = new URLSearchParams(window.location.search);
-const ETAPE_DIRECTE = parcours.findIndex(
+const CLE_VALIDE =
+  import.meta.env.DEV || empreinte(parametresUrl.get("cle") || "") === EMPREINTE_CLE_TEST;
+const ETAPE_DIRECTE = !CLE_VALIDE ? -1 : parcours.findIndex(
   (p) =>
     p.etape === parametresUrl.get("etape") &&
     (!parametresUrl.get("tour") || p.tour === Number(parametresUrl.get("tour")))
