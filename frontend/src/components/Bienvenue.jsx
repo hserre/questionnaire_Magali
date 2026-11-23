@@ -26,7 +26,11 @@ const LIBELLES = {
   tipoDislessia: "Che tipo di dislessia?",
   adhd: "Hai una diagnosi ufficiale che confermi il tuo ADHD?",
   tipoAdhd: "Che tipo di ADHD?",
-  trattamentoAdhd: "Segui attualmente un trattamento per l'ADHD?",
+  trattamentoAdhd:
+    "Stai attualmente assumendo un trattamento farmacologico per la tua diagnosi di ADHD?",
+  farmacoAdhd: "Quale dei seguenti farmaci per l'ADHD assumi? (Puoi selezionare più opzioni)",
+  farmacoPrima:
+    "Hai assunto il farmaco per l'ADHD prima di compilare questo questionario?",
 };
 
 
@@ -48,14 +52,17 @@ const optionsAnnoCorso = [
 
 const optionsSiNo = ["Sì", "No"];
 
-// Les 5 plus grandes universités italiennes (nombre d'inscrits), + "Altra università"
-const optionsUniversita = [
-  "Sapienza Università di Roma",
-  "Università di Bologna",
-  "Università di Torino",
-  "Università di Napoli Federico II",
-  "Università di Padova",
-  "Altra università",
+// Médicaments de l'ADHD (plusieurs choix possibles) ; "Altro" ouvre un champ texte ;
+// "Non desidero specificare" exclut les autres cases
+const FARMACO_ALTRO = "Altro";
+const FARMACO_NON_SPECIFICO = "Non desidero specificare";
+const optionsFarmacoAdhd = [
+  "Metilfenidato (Ritalin®, Medikinet®, Equasym®, Concerta®)",
+  "Lisdexamfetamina (Elvanse®)",
+  "Atomoxetina (Strattera®)",
+  "Guanfacina (Intuniv®)",
+  FARMACO_ALTRO,
+  FARMACO_NON_SPECIFICO,
 ];
 
 const optionsPosizioneFrancese = ["L2", "L3", "L4", "L5", "Altro"];
@@ -310,8 +317,11 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
     tipoDislessia: "", // sous-type, seulement si "Dislessia" est cochée
     adhd: "", // "Sì" / "No" / "Non desidero rispondere"
     tipoAdhd: "",
-    trattamentoAdhd: "", // "Sì" / "No", seulement si ADHD = "Sì"
-    universita: "",
+    trattamentoAdhd: "", // "Sì" / "No" / "Non desidero rispondere", seulement si ADHD = "Sì"
+    farmacoAdhd: [], // cases cochées, seulement si trattamentoAdhd = "Sì"
+    farmacoAltro: "", // texte libre si "Altro" est cochée
+    farmacoPrima: "", // seulement si trattamentoAdhd = "Sì"
+    universita: "", // texte libre
   });
 
   const maj = (cle, valeur) =>
@@ -348,6 +358,39 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
       adhd: valeur,
       tipoAdhd: valeur === "Sì" ? prev.tipoAdhd : "",
       trattamentoAdhd: valeur === "Sì" ? prev.trattamentoAdhd : "",
+      farmacoAdhd: valeur === "Sì" ? prev.farmacoAdhd : [],
+      farmacoAltro: valeur === "Sì" ? prev.farmacoAltro : "",
+      farmacoPrima: valeur === "Sì" ? prev.farmacoPrima : "",
+    }));
+
+  // Coche / décoche un médicament ; "Non desidero specificare" et les médicaments
+  // s'excluent ; décocher "Altro" efface son texte
+  const basculerFarmaco = (option) =>
+    setReponses((prev) => {
+      const dejaCoche = prev.farmacoAdhd.includes(option);
+      let coches;
+      if (dejaCoche) coches = prev.farmacoAdhd.filter((o) => o !== option);
+      else if (option === FARMACO_NON_SPECIFICO) coches = [option];
+      else
+        coches = [
+          ...prev.farmacoAdhd.filter((o) => o !== FARMACO_NON_SPECIFICO),
+          option,
+        ];
+      return {
+        ...prev,
+        farmacoAdhd: coches,
+        farmacoAltro: coches.includes(FARMACO_ALTRO) ? prev.farmacoAltro : "",
+      };
+    });
+
+  // Réponse sur le traitement : si ce n'est plus "Sì", on efface les questions sur le médicament
+  const majTrattamento = (valeur) =>
+    setReponses((prev) => ({
+      ...prev,
+      trattamentoAdhd: valeur,
+      farmacoAdhd: valeur === "Sì" ? prev.farmacoAdhd : [],
+      farmacoAltro: valeur === "Sì" ? prev.farmacoAltro : "",
+      farmacoPrima: valeur === "Sì" ? prev.farmacoPrima : "",
     }));
 
   // Date reconstruite au format "AAAA-MM-GG" (vide tant que les 3 menus ne sont pas remplis)
@@ -519,15 +562,18 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
     },
     {
       id: "universita",
-      complete: reponses.universita !== "",
+      complete: reponses.universita.trim() !== "",
       rendu: (
-        <GroupeRadio
-          titre="In quale università studi?"
-          nom="universita"
-          options={optionsUniversita}
-          valeur={reponses.universita}
-          onChange={(v) => maj("universita", v)}
-        />
+        <>
+          <TitreQuestion>In quale università studi?</TitreQuestion>
+          <input
+            className="champ-texte"
+            type="text"
+            value={reponses.universita}
+            onChange={(e) => maj("universita", e.target.value)}
+            style={styleChamp}
+          />
+        </>
       ),
     },
     {
@@ -656,11 +702,56 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
             complete: reponses.trattamentoAdhd !== "",
             rendu: (
               <GroupeRadio
-                titre="Segui attualmente un trattamento per l'ADHD?"
+                titre={LIBELLES.trattamentoAdhd}
                 nom="trattamentoAdhd"
-                options={optionsSiNo}
+                options={optionsDiagnosi}
                 valeur={reponses.trattamentoAdhd}
-                onChange={(v) => maj("trattamentoAdhd", v)}
+                onChange={majTrattamento}
+              />
+            ),
+          },
+        ]
+      : []),
+    ...(reponses.adhd === "Sì" && reponses.trattamentoAdhd === "Sì"
+      ? [
+          {
+            id: "farmacoAdhd",
+            complete:
+              reponses.farmacoAdhd.length > 0 &&
+              (!reponses.farmacoAdhd.includes(FARMACO_ALTRO) ||
+                reponses.farmacoAltro.trim() !== ""),
+            rendu: (
+              <>
+                <GroupeCases
+                  titre={LIBELLES.farmacoAdhd}
+                  options={optionsFarmacoAdhd}
+                  valeurs={reponses.farmacoAdhd}
+                  onToggle={basculerFarmaco}
+                />
+                {reponses.farmacoAdhd.includes(FARMACO_ALTRO) && (
+                  <input
+                    className="champ-texte"
+                    type="text"
+                    placeholder="Quale?"
+                    value={reponses.farmacoAltro}
+                    onChange={(e) => maj("farmacoAltro", e.target.value)}
+                    style={{ ...styleChamp, marginTop: "2svh" }}
+                    autoFocus
+                  />
+                )}
+              </>
+            ),
+          },
+          {
+            id: "farmacoPrima",
+            complete: reponses.farmacoPrima !== "",
+            rendu: (
+              <GroupeRadio
+                titre={LIBELLES.farmacoPrima}
+                nom="farmacoPrima"
+                options={optionsDiagnosi}
+                valeur={reponses.farmacoPrima}
+                onChange={(v) => maj("farmacoPrima", v)}
               />
             ),
           },
@@ -793,6 +884,13 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
     const valeurEtape = (id) => {
       if (id === "naissance") return dateNaissance;
       if (id === "dsaTipi") return reponses.dsaTipi.join(" ; ");
+      if (id === "universita") return reponses.universita.trim();
+      if (id === "farmacoAdhd")
+        return reponses.farmacoAdhd
+          .map((o) =>
+            o === FARMACO_ALTRO ? `${FARMACO_ALTRO}: ${reponses.farmacoAltro.trim()}` : o
+          )
+          .join(" ; ");
       return reponses[id];
     };
 

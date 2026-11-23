@@ -57,7 +57,9 @@ INFOS = {
     "Che tipo di dislessia?": "tipo_dislessia",
     "Hai una diagnosi ufficiale che confermi il tuo ADHD?": "adhd",
     "Che tipo di ADHD?": "tipo_adhd",
-    "Segui attualmente un trattamento per l'ADHD?": "trattamento_adhd",
+    "Stai attualmente assumendo un trattamento farmacologico per la tua diagnosi di ADHD?": "trattamento_adhd",
+    "Quale dei seguenti farmaci per l'ADHD assumi? (Puoi selezionare più opzioni)": "farmaco_adhd",
+    "Hai assunto il farmaco per l'ADHD prima di compilare questo questionario?": "farmaco_prima_adhd",
 }
 
 # Excel dans lesquels sont numérotées les questions longues
