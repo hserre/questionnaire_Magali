@@ -117,7 +117,7 @@ NOTES = [
      "Vocabulaire : de l'affichage du mot jusqu'au clic sur la proposition choisie (le dernier clic "
      "si le participant change d'avis), sans le temps passé ensuite à valider. "
      "Similitudes : de l'affichage de la question jusqu'à la validation, au plus le temps imparti "
-     "(25 s, ou 30 s si DSA / ADHD). "
+     "(25 s, ou 30 s si DSA déclaré : isDys = 1). "
      "Compréhension de texte : de l'affichage de l'affirmation jusqu'au clic sur le bouton de confirmation "
      "(choix vrai / faux compris) ; la lecture de l'article est à part, dans duree_lecture_<question> "
      "(de l'affichage de l'article au clic sur « Continua »). Passations d'avant le 17/11/2026 : ces deux "
@@ -277,7 +277,7 @@ def _infos(lignes):
     if "ecran_navigateur" in infos:
         infos["ecran_navigateur_nom"] = navigateur(infos["ecran_navigateur"])
         infos["ecran_systeme"] = systeme(infos["ecran_navigateur"])
-    infos["isDys"] = int(infos.get("dsa") == "Sì" or infos.get("adhd") == "Sì")
+    infos["isDys"] = int(infos.get("dsa") == "Sì")  # DSA seulement (pas l'ADHD)
     sorties = _sorties(lignes)
     infos["n_absences"] = len(sorties)
     infos["duree_absences"] = sorties["duree_reponse"].fillna(0).sum()

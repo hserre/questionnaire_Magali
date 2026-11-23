@@ -474,9 +474,9 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
   // (1 si DSA ou ADHD déclaré avec diagnostic, 0 sinon)
   const validerQuestionnaire = () => {
     setParticipant(code);
-    // isDys = 1 si un DSA (quel qu'il soit) ou un ADHD est déclaré avec diagnostic :
+    // isDys = 1 seulement si un DSA (quel qu'il soit) est déclaré avec diagnostic :
     // donne plus de temps dans Similitudes (30 s au lieu de 25 s)
-    setIsDys(reponses.dsa === "Sì" || reponses.adhd === "Sì" ? 1 : 0);
+    setIsDys(reponses.dsa === "Sì" ? 1 : 0); // DSA seulement (pas l'ADHD)
     onComplete();
   };
 

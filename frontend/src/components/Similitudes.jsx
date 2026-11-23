@@ -14,7 +14,7 @@ const estEssai = (item) =>
 
 // Durée de réponse (en secondes) pour chaque question d'entraînement / de test.
 // Cette valeur sert à la fois pour le décompte et pour le texte {temps} des instructions.
-// Temps de réponse par question (s) : 30 s si DSA ou ADHD déclaré (isDys = 1), 25 s sinon
+// Temps de réponse par question (s) : 30 s si DSA déclaré (isDys = 1), 25 s sinon
 const DUREE_NORMALE = 25;
 const DUREE_DYS = 30;
 
