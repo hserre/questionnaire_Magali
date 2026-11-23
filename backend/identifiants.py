@@ -48,6 +48,7 @@ INFOS = {
     "Per questo questionario, utilizzerai :": "ordi",
     "Sei:": "genere",
     "Data di nascita:": "data_nascita",
+    "In quale università studi?": "universita",
     "Anno di corso attuale e livello di studi:": "anno_corso",
     "Posizione del francese nella classifica delle lingue studiate:": "posizione_francese",
     "Numero di anni di studio pregresso del francese:": "anni_francese",
@@ -56,6 +57,7 @@ INFOS = {
     "Che tipo di dislessia?": "tipo_dislessia",
     "Hai una diagnosi ufficiale che confermi il tuo ADHD?": "adhd",
     "Che tipo di ADHD?": "tipo_adhd",
+    "Segui attualmente un trattamento per l'ADHD?": "trattamento_adhd",
 }
 
 # Excel dans lesquels sont numérotées les questions longues

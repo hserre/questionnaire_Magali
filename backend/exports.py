@@ -8,12 +8,13 @@ Tout est écrit dans backend/exports/ :
   bases_Magali.xlsx
       Copie de la base telle quelle : un onglet par table, mêmes lignes, mêmes colonnes.
 
-  projet_Magali_par_participant.xlsx  (+ .csv)
+  projet_Magali_par_participant.xlsx  (+ .csv, et _questionnaires.csv)
+      Onglets : "donnees" (une ligne par participant), "questionnaires" (Stratégies d'étude et
+      Approche de l'étude : réponses, positions, puis durées par item à la fin), "dictionnaire".
       Une ligne par participant.
       - Infos : participant, date, séance complète, durée de la séance, réponses du
         questionnaire d'accueil, isDys, écran, n_absences / duree_absences (sorties de la
-        fenêtre : onglet caché ou autre fenêtre ; aussi par épreuve), page_fermee (1 si la page
-        a été fermée ou rechargée avant la fin).
+        fenêtre : onglet caché ou autre fenêtre ; aussi par épreuve).
       - Pour chaque épreuve, dans l'ordre du parcours : score total et durée totale,
         puis pour chaque question trois colonnes :
             vocab_IT_tranquillo          la réponse
@@ -57,8 +58,15 @@ from scores_similitudes import A_VERIFIER, ORTHOGRAPHE
 # (la durée de l'épreuve est dans duree_totale_comp_IT / _FR)
 # Tableaux (Stratégies, Approche) : la durée enregistrée est le temps depuis l'affichage de
 # la page, pas un temps par item ; seules les durées totales sont gardées
-SANS_DUREE_PAR_QUESTION = {"Comprehension_IT", "Comprehension_FR",
-                           "StrategiesEtude_ideal", "StrategiesEtude_reel", "ApprocheEtude"}
+SANS_DUREE_PAR_QUESTION = {"Comprehension_IT", "Comprehension_FR"}
+# Questionnaires (tableaux d'échelles) : dans un onglet à part, "questionnaires"
+TABLEAUX = {"StrategiesEtude_ideal", "StrategiesEtude_reel", "ApprocheEtude"}
+# Épreuves avec entraînement : durée du test et durée de l'entraînement séparées
+AVEC_ENTRAINEMENT = {"Similitudes_IT", "Similitudes_FR", "Vocabulaire_IT", "Vocabulaire_FR"}
+# Barrage : nombre de formes de la grille (test : 10 lignes x 18 ; exercice : 3 x 7)
+TAILLE_GRILLE = {"test": 180, "exercice": 21}
+# Colonnes d'infos retirées de l'export
+INFOS_RETIREES = {"madrelingua", "page_fermee"}
 # Ordre des questions fixe (pas d'aléatoirisation) : pas de colonne position_
 SANS_POSITION = set()  # toutes les épreuves ont un ordre aléatoire (sauf le Barrage, sans questions)
 
@@ -115,19 +123,28 @@ NOTES = [
      "(de l'affichage de l'article au clic sur « Continua »). Passations d'avant le 17/11/2026 : ces deux "
      "colonnes sont vides (la durée enregistrée comprenait alors la lecture). "
      "Pas de durée par question pour la Compréhension (une seule validation pour tout le tableau) "
-     "ni pour les Stratégies et l'Approche."),
+     "(Stratégies et Approche : durées par item à la fin de l'onglet questionnaires)."),
+    ("duree_test_<épreuve>",
+     "Épreuves avec entraînement, durée de la partie test seule. Vocabulaire et Similitudes : de "
+     "l'affichage de la première question du test jusqu'à la dernière réponse du test (calculée à partir "
+     "des moments de réponse). Barrage : temps passé sur la grille du test (45 s au plus)."),
     ("duree_totale_<épreuve>",
-     "Vocabulaire et Similitudes : de l'affichage de la première question d'entraînement jusqu'à la "
-     "dernière réponse du test (entraînement et page de transition compris ; page de titre et vidéo non comprises). "
+     "Épreuves sans entraînement. "
      "Compréhension : de l'affichage du tableau jusqu'au clic sur « Conferma » (titre, consignes et vidéo non compris). "
      "Compréhension de texte : de l'affichage du premier article du test jusqu'à la dernière confirmation "
      "(l'exemple n'est pas compris). "
-     "Barrage : temps passé sur la grille du test (45 s au plus). "
      "Stratégies et Approche : de l'affichage de la première page de tableau jusqu'à la validation de la dernière."),
+    ("duree_entrainement_<épreuve>",
+     "Vocabulaire et Similitudes : de l'affichage de la première question d'entraînement jusqu'à la "
+     "dernière réponse d'entraînement. Barrage : temps passé sur la grille de l'exercice (10 s au plus)."),
+    ("Onglet questionnaires",
+     "Réponses aux Stratégies d'étude (1 et 2) et à l'Approche de l'étude, puis leurs positions "
+     "d'affichage, puis, à la fin, les durées par item : temps entre l'affichage de la page du tableau "
+     "et le dernier clic sur la ligne de l'item (le chronomètre repart à zéro à chaque page)."),
     ("duree_absences",
      "Somme des durées des sorties de la fenêtre (onglet caché, clic dans une autre application ou fenêtre), "
      "sur la séance (duree_absences) ou pendant l'épreuve (duree_absences_<épreuve>). "
-     "La fermeture de la page n'est pas comptée (voir page_fermee)."),
+     "La fermeture de la page n'est pas comptée."),
 ]
 
 _verrou = threading.Lock()
@@ -232,6 +249,16 @@ def _sorties(lignes):
     return pd.concat([absences, anciennes])
 
 
+def _duree_partie(lignes):
+    """Durée d'une partie (test ou entraînement), en s : de l'affichage de sa 1re question
+    (moment de la réponse moins temps de réponse) jusqu'à sa dernière réponse."""
+    l = lignes.dropna(subset=["time_stamp"])
+    if l.empty:
+        return None
+    debut = (l["time_stamp"] - l["duree_reponse"].fillna(0)).min()
+    return round(float(l["time_stamp"].max() - debut), 3)
+
+
 def _infos(lignes):
     infos = {"date": lignes["horodatage"].iloc[0]}
     duree = lignes["duree_seance"].dropna()
@@ -311,8 +338,17 @@ def tableau_large(df):
                 s = pd.to_numeric(derniers["score"], errors="coerce")
                 s = s[s.notna() & ~s.isin([A_VERIFIER, ORTHOGRAPHE])]
                 ligne[f"score_total_{prefixe}"] = s.sum() if len(s) else None
-            tot = e["duree_totale_epreuve"].dropna()
-            ligne[f"duree_totale_{prefixe}"] = tot.max() if len(tot) else None
+            if epreuve in AVEC_ENTRAINEMENT:
+                # du début de la 1re question à la dernière réponse, partie par partie
+                ligne[f"duree_test_{prefixe}"] = _duree_partie(e[e["partie"] == "test"])
+                ligne[f"duree_entrainement_{prefixe}"] = _duree_partie(e[e["partie"] == "entrainement"])
+            elif epreuve in BARRAGES:
+                for partie, nom in (("test", "duree_test"), ("exercice", "duree_entrainement")):
+                    v = e.loc[e["partie"] == partie, "duree_totale_epreuve"].dropna()
+                    ligne[f"{nom}_{prefixe}"] = v.max() if len(v) else None
+            else:
+                tot = e["duree_totale_epreuve"].dropna()
+                ligne[f"duree_totale_{prefixe}"] = tot.max() if len(tot) else None
             sorties = mes_sorties[mes_sorties["pendant"] == epreuve]
             ligne[f"n_absences_{prefixe}"] = len(sorties)
             ligne[f"duree_absences_{prefixe}"] = sorties["duree_reponse"].fillna(0).sum()
@@ -325,9 +361,15 @@ def tableau_large(df):
                         ligne[f"{nom}_{prefixe}{marque}"] = v.max() if len(v) else None
                     # position (dans la grille) de la dernière forme sélectionnée
                     clics = p.dropna(subset=["position_question", "position_symbole"])
-                    ligne[f"dernier_symbole_{prefixe}{marque}"] = (
-                        clics.sort_values(["position_question", "id"])["position_symbole"].iloc[-1]
-                        if len(clics) else None)
+                    dernier = (clics.sort_values(["position_question", "id"])["position_symbole"].iloc[-1]
+                               if len(clics) else None)
+                    ligne[f"dernier_symbole_{prefixe}{marque}"] = dernier
+                    # formes restantes entre la dernière sélectionnée et la fin de la grille
+                    # (aucune forme sélectionnée : toute la grille)
+                    nb = ligne[f"nb_selectionnes_{prefixe}{marque}"]
+                    ligne[f"nb_symboles_restants_{prefixe}{marque}"] = (
+                        TAILLE_GRILLE[partie] - int(dernier) if dernier is not None and pd.notna(dernier)
+                        else TAILLE_GRILLE[partie] if nb == 0 else None)
         for _, r in mes_essais.iterrows():  # dans l'ordre : la dernière réponse l'emporte
             if r["epreuve"] in BARRAGES:
                 continue                  # Barrage : seulement les totaux (détail dans la base)
@@ -357,21 +399,33 @@ def tableau_large(df):
                   *INFOS.values(), "isDys"]
     infos_cols += sorted(c for c in tout.columns if c.startswith("ecran_"))
     infos_cols += ["n_absences", "duree_absences", "page_fermee"]
-    ordre_cols = [c for c in infos_cols if c in tout.columns]
+    ordre_cols = [c for c in infos_cols if c in tout.columns and c not in INFOS_RETIREES]
     dico = []
     ordre_parties = list(PARTIES)
     cols_positions, dico_positions = [], []  # mises à la fin du tableau
     for epreuve, prefixe in PREFIXES.items():
         totaux = [f"score_total_{prefixe}",
-                  f"duree_totale_{prefixe}", f"n_absences_{prefixe}", f"duree_absences_{prefixe}",
+                  f"duree_totale_{prefixe}", f"duree_test_{prefixe}", f"duree_entrainement_{prefixe}",
+                  f"n_absences_{prefixe}", f"duree_absences_{prefixe}",
                   f"nb_selectionnes_{prefixe}_exerc", f"nb_corrects_{prefixe}_exerc",
-                  f"dernier_symbole_{prefixe}_exerc",
-                  f"nb_selectionnes_{prefixe}", f"nb_corrects_{prefixe}", f"dernier_symbole_{prefixe}"]
+                  f"dernier_symbole_{prefixe}_exerc", f"nb_symboles_restants_{prefixe}_exerc",
+                  f"nb_selectionnes_{prefixe}", f"nb_corrects_{prefixe}", f"dernier_symbole_{prefixe}",
+                  f"nb_symboles_restants_{prefixe}"]
         for c in totaux:
             if c in tout.columns:
                 ordre_cols.append(c)
                 contenu = ("position dans la grille de la dernière forme sélectionnée (1 = en haut à gauche)"
                            if c.startswith("dernier_symbole_") else
+                           "formes restantes entre la dernière sélectionnée et la fin de la grille "
+                           "(180 au test, 21 à l'exercice, moins la position de la dernière ; "
+                           "toute la grille si aucune forme sélectionnée)"
+                           if c.startswith("nb_symboles_restants_") else
+                           "durée totale de l'épreuve (s)"
+                           if c.startswith("duree_totale_") else
+                           "durée de la partie test, sans l'entraînement (s)"
+                           if c.startswith("duree_test_") else
+                           "durée de l'entraînement (Barrage : de l'exercice) (s)"
+                           if c.startswith("duree_entrainement_") else
                            "sorties de la fenêtre pendant l'épreuve (onglet caché, autre fenêtre)"
                            if c.startswith("n_absences_") else
                            "durée totale de ces sorties (s)" if c.startswith("duree_absences_") else "total")
@@ -421,41 +475,67 @@ def exporter_large(tables):
         return
     large, dico = tableau_large(df)
 
-    # Groupe (étape de l'expérience) de chaque colonne
+    # Épreuve de chaque colonne, et onglet où elle va :
+    # "donnees" pour tout, sauf les questionnaires (Stratégies, Approche) -> "questionnaires"
     epreuve_de = dict(zip(dico["colonne"], dico["epreuve"]))
-    def groupe(c):
+    def epreuve(c):
         ep = epreuve_de.get(c)
-        if ep is None or (isinstance(ep, float) and pd.isna(ep)):
+        return None if ep is None or (isinstance(ep, float) and pd.isna(ep)) else ep
+    def duree_item(c):
+        return c.startswith("duree_") and not c.startswith(("duree_totale_", "duree_test_", "duree_absences_"))
+    cols_quest = [c for c in large.columns if epreuve(c) in TABLEAUX]
+    cols_quest = ([c for c in cols_quest if not c.startswith("position_") and not duree_item(c)]
+                  + [c for c in cols_quest if c.startswith("position_")]
+                  + [c for c in cols_quest if duree_item(c)])          # durées à la fin
+    donnees = large[[c for c in large.columns if c not in set(cols_quest)]]
+    questionnaires = large[["participant"] + cols_quest]
+
+    def groupe(c):
+        ep = epreuve(c)
+        if ep is None:
             return "Participant"
         nom = GROUPES.get(ep, ep)
-        return f"Positions – {nom}" if c.startswith("position_") else nom
-    groupes = [groupe(c) for c in large.columns]
+        if c.startswith("position_"):
+            return f"Positions – {nom}"
+        if ep in TABLEAUX and duree_item(c):
+            return f"Durées – {nom}"
+        return nom
     dico = dico.copy()
     dico.insert(0, "groupe", [groupe(c) if isinstance(c, str) and c in large.columns else None
                               for c in dico["colonne"]])
+    dico.insert(0, "onglet", [("questionnaires" if c in set(cols_quest) else "donnees")
+                              if isinstance(c, str) and c in large.columns else None
+                              for c in dico["colonne"]])
+
+    def ecrire_onglet(w, nom, table):
+        from openpyxl.styles import Alignment, Font, PatternFill
+        _nettoyer_excel(table).to_excel(w, sheet_name=nom, index=False, startrow=1)
+        ws = w.sheets[nom]
+        # ligne 1 : une cellule fusionnée par groupe, au-dessus de ses colonnes
+        groupes = [groupe(c) for c in table.columns]
+        couleurs = ["FFDDEBF7", "FFFCE4D6"]
+        debut, n = 0, 0
+        for i in range(1, len(groupes) + 1):
+            if i == len(groupes) or groupes[i] != groupes[debut]:
+                cell = ws.cell(row=1, column=debut + 1, value=groupes[debut])
+                cell.font = Font(bold=True)
+                cell.alignment = Alignment(horizontal="center")
+                cell.fill = PatternFill("solid", fgColor=couleurs[n % 2])
+                if i - 1 > debut:
+                    ws.merge_cells(start_row=1, start_column=debut + 1, end_row=1, end_column=i)
+                debut, n = i, n + 1
+        ws.freeze_panes = "B3"  # participant, groupes et en-têtes toujours visibles
 
     def ecrire_xlsx(tmp):
-        from openpyxl.styles import Alignment, Font, PatternFill
         with pd.ExcelWriter(tmp, engine="openpyxl") as w:
-            _nettoyer_excel(large).to_excel(w, sheet_name="donnees", index=False, startrow=1)
+            ecrire_onglet(w, "donnees", donnees)
+            ecrire_onglet(w, "questionnaires", questionnaires)
             _nettoyer_excel(dico).to_excel(w, sheet_name="dictionnaire", index=False)
-            ws = w.sheets["donnees"]
-            # ligne 1 : une cellule fusionnée par groupe, au-dessus de ses colonnes
-            couleurs = ["FFDDEBF7", "FFFCE4D6"]
-            debut, n = 0, 0
-            for i in range(1, len(groupes) + 1):
-                if i == len(groupes) or groupes[i] != groupes[debut]:
-                    cell = ws.cell(row=1, column=debut + 1, value=groupes[debut])
-                    cell.font = Font(bold=True)
-                    cell.alignment = Alignment(horizontal="center")
-                    cell.fill = PatternFill("solid", fgColor=couleurs[n % 2])
-                    if i - 1 > debut:
-                        ws.merge_cells(start_row=1, start_column=debut + 1, end_row=1, end_column=i)
-                    debut, n = i, n + 1
-            ws.freeze_panes = "B3"  # participant, groupes et en-têtes toujours visibles
     _remplacer(DOSSIER / f"{NOM_LARGE}.xlsx", ecrire_xlsx)
     _remplacer(DOSSIER / f"{NOM_LARGE}.csv",
-               lambda tmp: large.to_csv(tmp, index=False, encoding="utf-8-sig"))
+               lambda tmp: donnees.to_csv(tmp, index=False, encoding="utf-8-sig"))
+    _remplacer(DOSSIER / f"{NOM_LARGE}_questionnaires.csv",
+               lambda tmp: questionnaires.to_csv(tmp, index=False, encoding="utf-8-sig"))
 
 
 # ---------------------------------------------------------------------------

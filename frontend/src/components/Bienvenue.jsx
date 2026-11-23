@@ -17,6 +17,7 @@ const LIBELLES = {
   ordi: "Per questo questionario, utilizzerai :",
   genre: "Sei:",
   naissance: "Data di nascita:",
+  universita: "In quale università studi?",
   annoCorso: "Anno di corso attuale e livello di studi:",
   posizioneFrancese: "Posizione del francese nella classifica delle lingue studiate:",
   anniFrancese: "Numero di anni di studio pregresso del francese:",
@@ -25,6 +26,7 @@ const LIBELLES = {
   tipoDislessia: "Che tipo di dislessia?",
   adhd: "Hai una diagnosi ufficiale che confermi il tuo ADHD?",
   tipoAdhd: "Che tipo di ADHD?",
+  trattamentoAdhd: "Segui attualmente un trattamento per l'ADHD?",
 };
 
 
@@ -45,6 +47,16 @@ const optionsAnnoCorso = [
 ];
 
 const optionsSiNo = ["Sì", "No"];
+
+// Les 5 plus grandes universités italiennes (nombre d'inscrits), + "Altra università"
+const optionsUniversita = [
+  "Sapienza Università di Roma",
+  "Università di Bologna",
+  "Università di Torino",
+  "Università di Napoli Federico II",
+  "Università di Padova",
+  "Altra università",
+];
 
 const optionsPosizioneFrancese = ["L2", "L3", "L4", "L5", "Altro"];
 
@@ -298,6 +310,8 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
     tipoDislessia: "", // sous-type, seulement si "Dislessia" est cochée
     adhd: "", // "Sì" / "No" / "Non desidero rispondere"
     tipoAdhd: "",
+    trattamentoAdhd: "", // "Sì" / "No", seulement si ADHD = "Sì"
+    universita: "",
   });
 
   const maj = (cle, valeur) =>
@@ -333,6 +347,7 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
       ...prev,
       adhd: valeur,
       tipoAdhd: valeur === "Sì" ? prev.tipoAdhd : "",
+      trattamentoAdhd: valeur === "Sì" ? prev.trattamentoAdhd : "",
     }));
 
   // Date reconstruite au format "AAAA-MM-GG" (vide tant que les 3 menus ne sont pas remplis)
@@ -503,6 +518,19 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
       ),
     },
     {
+      id: "universita",
+      complete: reponses.universita !== "",
+      rendu: (
+        <GroupeRadio
+          titre="In quale università studi?"
+          nom="universita"
+          options={optionsUniversita}
+          valeur={reponses.universita}
+          onChange={(v) => maj("universita", v)}
+        />
+      ),
+    },
+    {
       id: "annoCorso",
       complete: reponses.annoCorso !== "",
       rendu: (
@@ -620,6 +648,19 @@ export default function Bienvenue({ onComplete, setIsDys, setParticipant }) {
                 options={optionsTipoAdhd}
                 valeur={reponses.tipoAdhd}
                 onChange={(v) => maj("tipoAdhd", v)}
+              />
+            ),
+          },
+          {
+            id: "trattamentoAdhd",
+            complete: reponses.trattamentoAdhd !== "",
+            rendu: (
+              <GroupeRadio
+                titre="Segui attualmente un trattamento per l'ADHD?"
+                nom="trattamentoAdhd"
+                options={optionsSiNo}
+                valeur={reponses.trattamentoAdhd}
+                onChange={(v) => maj("trattamentoAdhd", v)}
               />
             ),
           },
